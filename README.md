@@ -1,2 +1,2 @@
 # thatsthewrongword
-A slack bot to give you the wrong definition for a word
+A slack bot to give wrong definitions
