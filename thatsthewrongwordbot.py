@@ -3,7 +3,6 @@ import time
 import requests
 import json
 import socket
-import psutil
 from slackclient import SlackClient
 
 FILE = open("secret.json", "r")
@@ -36,23 +35,30 @@ if slack_client.rtm_connect():
                 word = message_text[8:]
 
                 print("message_text:", word)
-
-                random_word_url = "http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=0&maxCorpusCount=0&minDictionaryCount=10&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key="+SECRETS['wordnik_key']
                 
-                response = requests.get(random_word_url)
-                random_word = response.json()['word']
+                error = 1
 
-                url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + LANGUAGE + '/' + random_word.lower()
+                while error:
+                    random_word_url = "http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=true&includePartOfSpeech=noun&minCorpusCount=0&maxCorpusCount=0&minDictionaryCount=10&maxDictionaryCount=-1&minLength=5&maxLength=-1&api_key="+SECRETS['wordnik_key']
+                    
+                    response = requests.get(random_word_url)
+                    random_word = response.json()['word']
 
-                response = requests.get(url, headers={'app_id': SECRETS['oxford_id'], 'app_key': SECRETS['oxford_key']})
+                    url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + LANGUAGE + '/' + random_word.lower()
 
-                #print(response.json())
+                    response = requests.get(url, headers={'app_id': SECRETS['oxford_id'], 'app_key': SECRETS['oxford_key']})
 
-                response = json.loads(json.dumps(response.json()))
-                
-                definition = response['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+                    #print(response.json())
 
-                formatted_response = "The definition of {0} is: {1}".format(word, definition)
+                    response = json.loads(json.dumps(response.json()))
+                    try:
+                        definition = response['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
+                        error = 0
+                    except:
+                        print("need to get a new word")
+                        error = 1
+
+                    formatted_response = "The definition of {0} is: {1}".format(word, definition)
 
                 slack_client.api_call(
                     "chat.postMessage",
