@@ -1,1 +1,1 @@
-python thatsthewrongword.py > thatswrong.log 2>&1 &
+python thatsthewrongwordbot.py > thatswrong.log 2>&1 &
