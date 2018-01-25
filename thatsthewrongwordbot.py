@@ -26,15 +26,15 @@ if slack_client.rtm_connect():
     while True:
         for message in slack_client.rtm_read():
 
-            if 'text' in message and (re.search(r"Define: .+", message['text']) or re.search(r"define: .+", message['text'])):
+            if 'text' in message and re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([A-Za-z0-9][A-Za-z0-9 ]+)([\?\.\!]*)", message['text']):
 
                 #print("Message received: %s" % json.dumps(message, indent=2))
 
-                message_text = message['text']
+                message_text = re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([A-Za-z0-9][A-Za-z0-9 ]+)([\?\.\!]*)", message['text'])
 
-                word = message_text[8:]
+                print("Message captured:", message_text)
 
-                print("message_text:", word)
+                word = message_text[0][len(message_text[0])-2]
                 
                 error = 1
 
