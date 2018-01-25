@@ -32,9 +32,11 @@ if slack_client.rtm_connect():
 
                 message_text = re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([A-Za-z0-9][A-Za-z0-9 ]+)([\?\.\!]*)", message['text'])
 
-                print("Message captured:", message_text)
+                print("Message captured: ", message_text)
 
                 word = message_text[0][len(message_text[0])-2]
+
+                print(word)
                 
                 error = 1
 
@@ -50,7 +52,8 @@ if slack_client.rtm_connect():
 
                     #print(response.json())
 
-                    response = json.loads(json.dumps(response.json()))
+                    #response = json.loads(json.dumps(response.json()))
+                    response = response.json()
                     try:
                         definition = response['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
                         error = 0
