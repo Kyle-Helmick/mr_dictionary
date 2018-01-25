@@ -1,0 +1,15 @@
+[Unit]
+Description=Provides slack mr_dictionary which gives wrong definitions
+After=network.target
+
+[Service]
+Type=simple
+User=kyle
+WorkingDirectory=/home/csuac
+ExecStart=/usr/bin/python3 /home/kyle/thatsthewrongword/thatsthewrongwordbot.py
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target

@@ -5,10 +5,12 @@ import json
 import socket
 from slackclient import SlackClient
 
-FILE = open("secret.json", "r")
+FILE = open("/home/kyle/thatsthewrongword/secret.json", "r")
 STRING_SECRETS = FILE.read()
 SECRETS = json.loads(STRING_SECRETS)
 FILE.close()
+
+print("STARTUP")
 
 LANGUAGE = 'en'
 
