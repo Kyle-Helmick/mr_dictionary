@@ -58,7 +58,7 @@ if slack_client.rtm_connect():
                         print("need to get a new word")
                         error = 1
 
-                    formatted_response = "The definition of {0} is: {1}".format(word, definition)
+                    formatted_response = "The definition of \"{0}\" is: {1}".format(word, definition)
 
                 slack_client.api_call(
                     "chat.postMessage",
