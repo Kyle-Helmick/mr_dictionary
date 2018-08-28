@@ -5,7 +5,7 @@ import json
 import socket
 from slackclient import SlackClient
 
-FILE = open("/home/kyle/thatsthewrongword/secret.json", "r")
+FILE = open("/home/kyle/mr_dictionary/secret.json", "r")
 STRING_SECRETS = FILE.read()
 SECRETS = json.loads(STRING_SECRETS)
 FILE.close()
@@ -19,7 +19,7 @@ slack_client = SlackClient(SECRETS['slack_key'])
 user_list = slack_client.api_call("users.list")
 
 for user in user_list.get('members'):
-    if user.get('name') == "dictionary_bot":
+    if user.get('name') == "mr_dictionary":
         slack_user_id = user.get('id')
         break
 
@@ -28,9 +28,9 @@ if slack_client.rtm_connect():
     while True:
         for message in slack_client.rtm_read():
 
-            if 'text' in message and re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([A-Za-z0-9][A-Za-z0-9 ]+)([\?\.\!]*)", message['text']):
+            if 'text' in message and re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([^?^.^!].+?)([.?!]+|$)", message['text']):
 
-                message_text = re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([A-Za-z0-9][_A-Za-z0-9 ]+)([\?\.\!]*)", message['text'])
+                message_text = re.findall(r"([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([^?^.^!].+?)([.?!]+|$)", message['text'])
 
                 print("Message captured: ", message_text)
 
@@ -55,7 +55,7 @@ if slack_client.rtm_connect():
                         response = response.json()
                         definition = response['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions'][0]
                         error = 0
-                        formatted_response = "The definition of `{0}` is: {1}".format(word, definition)
+                        formatted_response = "The definition of “{0}” is: {1}".format(word, definition)
                         print("Formatted response: ", formatted_response)
                     except:
                         print("need to get a new word")
@@ -68,4 +68,4 @@ if slack_client.rtm_connect():
                     text=formatted_response,
                     as_user=True)
 
-        time.sleep(1)
+        time.sleep(.5)
