@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=kyle
-WorkingDirectory=/home/csuac
-ExecStart=/usr/bin/python3 /home/kyle/thatsthewrongword/thatsthewrongwordbot.py
+WorkingDirectory=/home/kyle
+ExecStart=/usr/bin/python3 /home/kyle/mr_dictionary/mr_dictionary.py
 Restart=always
 StandardOutput=syslog
 StandardError=syslog
