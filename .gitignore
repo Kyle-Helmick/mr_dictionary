@@ -100,5 +100,7 @@ ENV/
 # mypy
 .mypy_cache/
 
-# kyleputthishere
-secret*
+# kyle put this here
+config.json
+*.code-workspace
+.vscode
