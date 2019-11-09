@@ -1,9 +1,9 @@
 import json
 import linecache
 import logging
-import re
 import os
 import random
+import re
 import socket
 import time
 
@@ -13,6 +13,8 @@ import slack
 logging.basicConfig(
     format='%(asctime)s [MrDictionary] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p'
 )
+
+logger = logging.getLogger()
 
 FILE = open('./config.json', 'r')
 CONFIG = json.loads(FILE.read())
@@ -27,9 +29,9 @@ loaded_configs = set(CONFIG.keys())
 
 try:
     assert loaded_configs.issubset(REQUIRED_CONFIGS)
-    logging.info('Loaded config')
+    logger.info('Loaded config')
 except Exception as e:
-    logging.error(
+    logger.error(
         f'Required keys [{REQUIRED_CONFIGS.difference(loaded_configs)}] not found in config.')
     pass
 
@@ -75,20 +77,20 @@ def formatted_response(random_word, definitions):
 
 def lambda_handler(event, context):
 
-    logging.info(f"CONFIG: {CONFIG}")
+    logger.info(f"CONFIG: {CONFIG}")
     body = json.loads(event['body'])
 
     if 'challenge' in body:
-        logging.info("Returning challenge response")
+        logger.info("Returning challenge response")
         return {
             'statusCode': 200,
             'body': body['challenge']
         }
 
     if body['token'] != CONFIG['slack_verification']:
-        logging.warning("Returning for invalid signing")
-        logging.info(f"body['token']: {body['token']}")
-        logging.info(
+        logger.warning("Returning for invalid signing")
+        logger.info(f"body['token']: {body['token']}")
+        logger.info(
             f"CONFIG['slack_verification']: {CONFIG['slack_verification']}"
         )
         return {
@@ -108,9 +110,9 @@ def lambda_handler(event, context):
     mr_dictionary = mr_dictionary[0]  # because list :/
 
     if body['event']['user'] == mr_dictionary['id']:
-        logging.info("Returning for self response")
-        logging.info(f"body['event']['user']: {body['event']['user']}")
-        logging.info(f"mr_dictionary['id']: {mr_dictionary['id']}")
+        logger.info("Returning for self response")
+        logger.info(f"body['event']['user']: {body['event']['user']}")
+        logger.info(f"mr_dictionary['id']: {mr_dictionary['id']}")
         return {
             'statusCode': 200,
             'body': 'no-op'
@@ -120,11 +122,11 @@ def lambda_handler(event, context):
         message_text = re.findall(
             r'([Dd]efine: |[Ww]hat is |[Ww]hat\'s |[Ww]hats )([^?^.^!].+?)([.?!]+|$)', body['event']['text'])
 
-        logging.info(f'Message captured: {message_text}')
+        logger.info(f'Message captured: {message_text}')
 
         word = message_text[0][len(message_text[0])-2]
 
-        logging.info(f'Word identified: {word}')
+        logger.info(f'Word identified: {word}')
 
         dictionary_tries = 3
 
@@ -137,7 +139,7 @@ def lambda_handler(event, context):
             except:
                 dictionary_tries -= 1
                 if dictionary_tries == 0:
-                    logging.error(
+                    logger.error(
                         "Returning for failing to download dictionary"
                     )
                     return {
@@ -149,7 +151,7 @@ def lambda_handler(event, context):
 
         while get_word_tries:
             random_word = get_random_word()
-            logging.info(f'Random_word: {random_word}')
+            logger.info(f'Random_word: {random_word}')
 
             try:
                 definitions = define_word(random_word)
@@ -159,10 +161,10 @@ def lambda_handler(event, context):
                     )
                 break
             except:
-                logging.error('Failed to pick word with definitions')
+                logger.error('Failed to pick word with definitions')
                 get_word_tries -= 1
                 if get_word_tries == 0:
-                    logging.error(
+                    logger.error(
                         "Returning for failing to pick word with definition"
                     )
                     return {
@@ -179,9 +181,9 @@ def lambda_handler(event, context):
             text=response_body
         )
 
-        logging.info("Returning for successful chat response")
-        logging.info(f"channel: {channel}")
-        logging.info(f"response_body: {response_body}")
+        logger.info("Returning for successful chat response")
+        logger.info(f"channel: {channel}")
+        logger.info(f"response_body: {response_body}")
         return {
             'statusCode': 200,
             'body': "Successful chat response"
