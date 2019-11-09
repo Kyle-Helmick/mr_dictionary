@@ -60,7 +60,7 @@ def get_random_word():
 
 
 def define_word(word):
-    url = f'https://www.dictionaryapi.com/api/v3/references/collegiate/json/{word}?key={CONFIG['dictionary_key']}'
+    url = f'https://www.dictionaryapi.com/api/v3/references/collegiate/json/{word}?key={CONFIG["dictionary_key"]}'
     response = requests.get(url)
     defs = [x.capitalize() for x in response.json()[0]['shortdef']]
     return defs
