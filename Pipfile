@@ -10,6 +10,7 @@ autopep8 = "*"
 pylint = "*"
 requests = "*"
 slackclient = "*"
+idna-ssl = "*"
 
 [requires]
 python_version = "3.6"

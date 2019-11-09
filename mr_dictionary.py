@@ -18,10 +18,10 @@ FILE = open('./config.json', 'r')
 CONFIG = json.loads(FILE.read())
 FILE.close()
 
-DICTIONARY_FILE = 'dictionary.txt'
+DICTIONARY_FILE = '/tmp/dictionary.txt'
 
 REQUIRED_CONFIGS = set(
-    ['slack_token', 'slack_verification', 'dictionary_key', 'thesaurus_key']
+    ['slack_verification', 'slack_token', 'dictionary_key', 'thesaurus_key']
 )
 loaded_configs = set(CONFIG.keys())
 
@@ -67,7 +67,7 @@ def define_word(word):
 
 
 def formatted_response(random_word, definitions):
-    if len(definitions == 1):
+    if len(definitions) == 1:
         return f'{random_word.capitalize()} might mean the following!\n{definitions[0]}'
 
     return f"{random_word.capitalize()} might mean one of the following!\n{' | '.join(definitions)}"
@@ -75,15 +75,26 @@ def formatted_response(random_word, definitions):
 
 def lambda_handler(event, context):
 
+    print("EVENT")
+    print(event)
+    print("EVENT")
+    print("CONFIG")
+    print(CONFIG)
+    print("CONFIG")
+
     body = json.loads(event['body'])
 
     if 'challenge' in body:
+        print("returning for challenge")
         return {
             'statusCode': 200,
             'body': body['challenge']
         }
 
-    if body['token'] != CONFIG['slack_token']:
+    if body['token'] != CONFIG['slack_verification']:
+        print("returning for token")
+        print(body['token'])
+        print(CONFIG['slack_verification'])
         return {
             'statusCode': 401,
             'body': 'Invalid signing'
@@ -98,7 +109,10 @@ def lambda_handler(event, context):
         user_list['members']
     ))
 
-    if body['event']['user'] == mr_dictionary['id']:
+    if body['event']['user'] == mr_dictionary[0]['id']:
+        print("returning for self message")
+        print(body['event']['user'])
+        print(mr_dictionary['id'])
         return {
             'statusCode': 200,
             'body': 'no-op'
@@ -122,10 +136,13 @@ def lambda_handler(event, context):
                     'https://gist.githubusercontent.com/Kyle-Helmick/11ca009418c600c946a9a0de7a0987ba/raw/ff2cac9bce8a621c29c146b00d96b2db21b78be6/2of12inf.txt'
                 )
                 break
-            except:
+            except Exception as e:
+                print(e)
+                logging.error(e)
                 logging.error('dictionary failed to download')
                 dictionary_tries -= 1
                 if dictionary_tries == 0:
+                    print("returning for dictionary failure")
                     return {
                         'statusCode': 500,
                         'body': f'{DICTIONARY_FILE} failed to download'
@@ -144,10 +161,13 @@ def lambda_handler(event, context):
                         f'{random_word} did not have any definitions'
                     )
                 break
-            except:
+            except Exception as e:
+                print(e)
+                logging.error(e)
                 logging.error('Failed to pick word with definitions')
                 get_word_tries -= 1
                 if get_word_tries == 0:
+                    print("returning for work pick error")
                     return {
                         'statusCode': 500,
                         'body': 'Continuously failed to pick word with definitions'
@@ -162,6 +182,9 @@ def lambda_handler(event, context):
             text=response_body
         )
 
+        print("returning")
+        print("channel")
+        print("response_body")
         return {
             'statusCode': 200,
             'body': "Successful chat response"
