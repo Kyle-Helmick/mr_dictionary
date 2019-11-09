@@ -75,26 +75,22 @@ def formatted_response(random_word, definitions):
 
 def lambda_handler(event, context):
 
-    print("EVENT")
-    print(event)
-    print("EVENT")
-    print("CONFIG")
-    print(CONFIG)
-    print("CONFIG")
-
+    logging.info(f"CONFIG: {CONFIG}")
     body = json.loads(event['body'])
 
     if 'challenge' in body:
-        print("returning for challenge")
+        logging.info("Returning challenge response")
         return {
             'statusCode': 200,
             'body': body['challenge']
         }
 
     if body['token'] != CONFIG['slack_verification']:
-        print("returning for token")
-        print(body['token'])
-        print(CONFIG['slack_verification'])
+        logging.warning("Returning for invalid signing")
+        logging.info(f"body['token']: {body['token']}")
+        logging.info(
+            f"CONFIG['slack_verification']: {CONFIG['slack_verification']}"
+        )
         return {
             'statusCode': 401,
             'body': 'Invalid signing'
@@ -109,10 +105,12 @@ def lambda_handler(event, context):
         user_list['members']
     ))
 
-    if body['event']['user'] == mr_dictionary[0]['id']:
-        print("returning for self message")
-        print(body['event']['user'])
-        print(mr_dictionary['id'])
+    mr_dictionary = mr_dictionary[0]  # because list :/
+
+    if body['event']['user'] == mr_dictionary['id']:
+        logging.info("Returning for self response")
+        logging.info(f"body['event']['user']: {body['event']['user']}")
+        logging.info(f"mr_dictionary['id']: {mr_dictionary['id']}")
         return {
             'statusCode': 200,
             'body': 'no-op'
@@ -136,13 +134,12 @@ def lambda_handler(event, context):
                     'https://gist.githubusercontent.com/Kyle-Helmick/11ca009418c600c946a9a0de7a0987ba/raw/ff2cac9bce8a621c29c146b00d96b2db21b78be6/2of12inf.txt'
                 )
                 break
-            except Exception as e:
-                print(e)
-                logging.error(e)
-                logging.error('dictionary failed to download')
+            except:
                 dictionary_tries -= 1
                 if dictionary_tries == 0:
-                    print("returning for dictionary failure")
+                    logging.error(
+                        "Returning for failing to download dictionary"
+                    )
                     return {
                         'statusCode': 500,
                         'body': f'{DICTIONARY_FILE} failed to download'
@@ -152,7 +149,7 @@ def lambda_handler(event, context):
 
         while get_word_tries:
             random_word = get_random_word()
-            logging.info(f'random_word: {random_word}')
+            logging.info(f'Random_word: {random_word}')
 
             try:
                 definitions = define_word(random_word)
@@ -161,13 +158,13 @@ def lambda_handler(event, context):
                         f'{random_word} did not have any definitions'
                     )
                 break
-            except Exception as e:
-                print(e)
-                logging.error(e)
+            except:
                 logging.error('Failed to pick word with definitions')
                 get_word_tries -= 1
                 if get_word_tries == 0:
-                    print("returning for work pick error")
+                    logging.error(
+                        "Returning for failing to pick word with definition"
+                    )
                     return {
                         'statusCode': 500,
                         'body': 'Continuously failed to pick word with definitions'
@@ -182,9 +179,9 @@ def lambda_handler(event, context):
             text=response_body
         )
 
-        print("returning")
-        print("channel")
-        print("response_body")
+        logging.info("Returning for successful chat response")
+        logging.info(f"channel: {channel}")
+        logging.info(f"response_body: {response_body}")
         return {
             'statusCode': 200,
             'body': "Successful chat response"
